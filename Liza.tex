@@ -1,0 +1,213 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={Liza},
+  pdfauthor={Olga Alieva},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{Liza}
+\author{Olga Alieva}
+\date{2023-07-21}
+
+\begin{document}
+\maketitle
+
+\hypertarget{ux43fux435ux440ux435ux447ux438ux442ux44bux432ux430ux44f-ux431ux435ux434ux43dux443ux44e-ux43bux438ux437ux443-sentiment-analysis-ux434ux43bux44f-ux441ux435ux43dux442ux438ux43cux435ux43dux442ux430ux43bux44cux43dux43eux439-ux43fux440ux43eux437ux44b}{%
+\section{Перечитывая ``Бедную Лизу'': Sentiment Analysis для
+сентиментальной
+прозы}\label{ux43fux435ux440ux435ux447ux438ux442ux44bux432ux430ux44f-ux431ux435ux434ux43dux443ux44e-ux43bux438ux437ux443-sentiment-analysis-ux434ux43bux44f-ux441ux435ux43dux442ux438ux43cux435ux43dux442ux430ux43bux44cux43dux43eux439-ux43fux440ux43eux437ux44b}}
+
+Про ``Бедную Лизу'' Карамзина все помнят ровно столько, чтобы не
+стремиться ее перечитывать: бедная крестьянская девушка влюбляется в
+дворянина, который, разорившись, женится на богатой вдове. Лиза топится
+в пруду. ``Слащавая'', по выражению Вайля и Гениса, повесть об
+``опереточной'' крестьянке и ее ``добродетельной'' матушке. Чтобы читать
+Карамзина сегодня, пишут они, нужно запастись ``эстетическим цинизмом,
+позволяющим наслаждаться старомодным простодушием текста''.
+
+Вместо эстетического цинизма мы, однако, запаслись инструментами
+компьютерного анализа текста, чтобы с их помощью понять: все ли так
+однозначно и простодушно в этой сентиментальной повести?
+
+Анализ текста проводился на языке R с использованием IDE RStudio. Текст
+``Лизы'' мы забрали с сайта Lib.ru.
+
+Для лемматизации ипользовался пакет \texttt{udpipe} и модель, обученная
+на корпусе \textbf{СинТагРус} (сокр. от англ.
+\href{https://urlis.net/2yqwwngu}{Syntactically Tagged Russian text
+corpus}, то есть «синтаксически аннотированный корпус русских
+текстов»)\footnote{\url{https://universaldependencies.org/treebanks/ru_syntagrus/index.html}}.
+
+Для анализа эмоциональной тональности мы выбрали лексикон
+\href{https://www.labinform.ru/pub/rusentilex/index.htm}{RuSentiLex}
+2016 г., доступный в пакете \texttt{rulexicon}. Он содержит около 15000
+уникальных слов или фраз, среди которых оценочные слова, а также слова и
+выражения, не передающие оценочное отношения автора, но имеющие
+положительную или отрицательную ассоциацию (коннотацию). Возможные
+значения переменной \texttt{sentiment}: neutral, positive, negative, а
+также positive/negative. Для некоторых лемм мы внесли изменения вручную:
+так, слова ``зеленый'', ``старый'', ``тучный'' у Карамзина не несут
+негативной окраски, равно как и ``простой'', ``тихий'' и
+``чувствительный''.
+
+Выбрав из текста все существительные, мы c удивлением обнаружили, что
+слова ``мать'', ``матушка'', ``старушка'' (42 раза) встречаются в тексте
+в два раза чаще, чем слова ``Лиза'' или ``девушка'' (22 раза):
+
+\begin{verbatim}
+## # A tibble: 5 x 2
+##   lemma        n
+##   <chr>    <int>
+## 1 мать        21
+## 2 Лиза        16
+## 3 матушка     11
+## 4 старушка    10
+## 5 девушка      6
+\end{verbatim}
+
+В повести о влюбленной девушке Карамзин гораздо чаще говорит о ее
+матери, чем о ней самой! И здесь уместно напомнить, что самая знаменитая
+фраза этой повести -- ``и крестьянки любить умеют!'' -- относится вовсе
+не к Лизе, а к ее матери, трогательно ожидающей встречи со своим мужем
+на том свете. С мужем, о котором ничего не известно, что звали его
+заурядным именем Иван и жил он со своей женой в согласии.
+
+Разделив весь текст ``Лизы'' на отрывки по 100 слов, мы решили
+проверить, как меняется эмоциональная тональность произведения по мере
+развития сюжета. В тексте чуть более 5000 слов, у нас получился 51
+отрывок. Переменную \texttt{sentiment} мы перевели из категориального
+(positive/negative) в числовой формат (-1 / 1); нейтральную лексику
+удалили. Для некоторых неоднозначных слов (positive/negative) прямо
+указали, как они окрашены у Карамзина. Это дало возможность сложить все
+negative и positive в отрывке: там, где значение оказалось выше нуля,
+преобладает положительная тональность, а там, где ниже -- отрицательная.
+Результат можно видеть на графике:
+
+\includegraphics{Liza_files/figure-latex/Тональность текста на оси повестовательного времени-1.pdf}
+
+И снова текст Карамзина повел себя достаточно неожиданно.
+
+Негативная тональность в начале повести (отрывок 5) не имеет ничего
+общего с развитием сюжета: здесь такие слова, как ``неприятель'',
+``опустошать'', ``свирепый''. Рассказчик, глядя на опустевший Симонов
+монастырь, вспоминает о ``печальной истории'' Москвы. Таким образом, с
+количественной точки зрения, самые мрачные фрагменты повести посвящены
+не судьбе бедной девушки, а судьбе страны: Карамзин историк уже
+переигрывает Карамзина-новелиста. Вот это место:
+
+\begin{quote}
+Иногда на вратах храма рассматриваю изображение чудес, в сем монастыре
+случившихся, там рыбы падают с неба для насыщения жителей монастыря,
+осажденного многочисленными врагами; тут образ богоматери обращает
+неприятелей в бегство. Все сие обновляет в моей памяти историю нашего
+отечества --- печальную историю тех времен, когда свирепые татары и
+литовцы огнем и мечом опустошали окрестности российской столицы и когда
+несчастная Москва, как беззащитная вдовица, от одного бога ожидала
+помощи в лютых своих бедствиях.
+\end{quote}
+
+Называя Москву ``вдовицей'' Каразин тем самым связывает ее образ с
+образом Лизиной матери, тоже бедной вдовы, за которую некому
+заступиться. В отрывке 11 график отразил тревогу матери о судьбе дочери:
+``У меня всегда сердце бывает не на своем месте, когда ты ходишь в
+город; я всегда ставлю свечу перед образ и молю господа бога, чтобы он
+сохранил тебя от всякой беды и напасти''. Здесь проявляется естественное
+для сентименталиста противопоставление порочного города и мирной, чистой
+природы.
+
+Тревога оказывается ненапрасной. Отрывок 34 -- это падение Лизы:
+``Грозно шумела буря, дождь лился из черных облаков --- казалось, что
+натура сетовала о потерянной Лизиной невинности''. С точки зрения
+эмоциональной окрашенности этот место даже более насыщено, чем эпизод
+самоубийства Лизы: нравственная смерть Лизы случается раньше, чем
+физическая, о которой Карамзин говорит, конечно, с грустью, но без
+надрыва: ``Тут она бросилась в воду''.
+
+Мрачную тональность последним страницам придает не столько известие о
+гибели дочери, сколько скорбная участь ее матери: ``Лизина мать услышала
+о страшной смерти дочери своей, и кровь ее от ужаса охладела --- глаза
+навек закрылись''. Лиза, эта нежная и чувствительна натура, перед
+смертью распоряжается насчет денег для матери, не задумываясь о том, что
+и сам ее поступок, и этот дикий подарок убьют старушку. Ее
+чувствительности не хватает на то, чтобы представить страдания другого
+сердца.
+
+В начале повести она говорит матери: ``Бог дал мне руки, чтобы
+работать\ldots{} ты кормила меня своею грудью и ходила за мною, когда я
+была ребенком; теперь пришла моя очередь ходить на тобою''. Об этих
+словах она забывает, как только ее бросает любовник. Крестьянки умеют
+любить -- да, но не все. И не всех.
+
+Карамзин, конечно, жалеет девушку, как жалеет он и ветреного Эраста. И
+жанр сентиментальной повести вынуждает его говорить прежде всего о
+судьбе несчастной Лизы. Но, кажется, две вдовицы -- Москва и
+старушка-мать -- вызывают не меньшее, а может быть и большее его
+сочувствие.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\emph{Все сказанное следует понимать лишь как читательский опыт, не
+претендующий на литературоведческую основательность.}
+
+\end{document}
